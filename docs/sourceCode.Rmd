@@ -1,0 +1,631 @@
+---
+title: "Source Code with Comments"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Load packages
+library(tidyverse)     # includes dplyr, ggplot2, readr, etc.
+library(tidygeocoder)
+library(lubridate)
+library(hms)
+library(gstat)
+library(sp)
+library(gganimate)
+library(viridis)
+library(OpenStreetMap)
+library(sf)
+library(rosm)
+library(terra)
+library(ggmap)
+```
+
+## NOTE: Chunks of code have been commented to improve website loading performance. 
+
+## Data loading 
+  - Reads the events data from `ORD_Single_Event_10272024.csv`.
+  - Filters the events to retain only those where `Classification` equals "Aircraft" (focusing on aircraft noise events).
+  - Reads monitoring site data from `O_Hare_Noise_Monitoring_Sites.csv` and uses `glimpse()` to quickly inspect its structure.
+
+```{r}
+# Read the csv file
+data <- suppressWarnings(read_csv("ORD_Single_Event_10272024.csv", show_col_types = FALSE))
+
+# Filter the data to only include aircraft noises
+aircraft_only <- data %>%
+  filter(Classification == "Aircraft")
+
+monitoring_sites <- suppressWarnings(read_csv("O_Hare_Noise_Monitoring_Sites.csv", show_col_types = FALSE))
+glimpse(monitoring_sites)
+```
+
+## Geocode the addresses
+  - Uses the `tidygeocoder` package (with the OpenStreetMap geocoding method) to convert the addresses in the `Location` column into geographic coordinates.
+  - The new latitude and longitude values are stored in the columns `latitude` and `longitude`.
+  - Uses `glimpse()` to inspect the updated dataset including the new coordinate columns.
+
+```{r}
+monitoring_sites <- monitoring_sites %>% mutate(Location = as.character(Location))
+monitoring_sites_with_coords <- monitoring_sites %>%
+  tidygeocoder::geocode(Location, method = 'osm', lat = latitude, long = longitude)
+
+# Check the results
+glimpse(monitoring_sites_with_coords)
+```
+
+## Checking if any address failed to geocode
+ - Filters the geocoded data to show only those rows where either `latitude` or `longitude` is missing, so you can identify addresses that didn’t geocode properly.
+  - Selects and displays key columns (`Site`, `Location`, `latitude`, `longitude`) for these problematic addresses.
+  - Counts and prints the number of failed geocoding attempts using `cat()`, so you’re aware of the overall geocoding success rate.
+
+```{r}
+# Show addresses that failed to geocode
+monitoring_sites_with_coords %>%
+  filter(is.na(latitude) | is.na(longitude)) %>%
+  select(Site, Location, latitude, longitude)
+
+# Count how many addresses failed to geocode
+na_count <- monitoring_sites_with_coords %>%
+  filter(is.na(latitude) | is.na(longitude)) %>%
+  nrow()
+
+cat("Number of addresses that failed to geocode:", na_count, "out of", nrow(monitoring_sites_with_coords), "\n")
+```
+
+## Hardcode the latitude and longitude for failed geocoding addresses
+ - Uses `mutate()` along with `case_when()` to manually fill in the missing latitude and longitude values for specific addresses (the ones that failed geocoding) using values obtained from Google Maps.
+  - The logic checks if the `Location` matches one of the known problematic addresses and then hardcodes the correct coordinates.
+  - Finally, it sums up any remaining missing coordinate values to verify that the manual correction was successful.
+
+```{r}
+monitoring_sites_with_coords <- monitoring_sites_with_coords %>%
+  mutate(
+    latitude = case_when(
+      Location == "1601 Nicholas Avenue, Elk Grove Village" ~ 42.00381844250957,
+      Location == "1835 Wood Ln, Mt Prospect, IL 60056, USA" ~ 42.09381165237296,
+      Location == "7990 W Keeney St, Niles, IL 60714, USA" ~ 42.02796143660958,
+      TRUE ~ latitude
+    ),
+    longitude = case_when(
+      Location == "1601 Nicholas Avenue, Elk Grove Village" ~ -87.94840686076198,
+      Location == "1835 Wood Ln, Mt Prospect, IL 60056, USA" ~ -87.89791031842996,
+      Location == "7990 W Keeney St, Niles, IL 60714, USA" ~ -87.82586597240149,
+      TRUE ~ longitude
+    )
+  )
+
+# Check for any remaining NA values
+sum(is.na(monitoring_sites_with_coords$latitude) | 
+    is.na(monitoring_sites_with_coords$longitude))
+```
+
+## Make an interactive map showing where all the monitoring locations are.
+  - Loads `leaflet` and `htmlwidgets` to create an interactive web map.
+  - Initializes a leaflet map with the monitoring sites data, using the OpenStreetMap Mapnik tiles for a clean basemap.
+  - Sets the initial view of the map to the mean longitude and latitude of all monitoring sites (ignoring missing values), with a zoom level of 11.
+  - Adds circle markers for each monitoring site:
+    - Markers are styled (radius, color, fill opacity) and display a popup that includes the site ID and address.
+    - Each marker has a label that shows the site number.
+  - Adds a legend in the bottom right corner that explains the marker’s meaning.
+  - Finally, the interactive map is rendered for viewing.
+  
+```{r}
+# # Load required libraries
+# library(leaflet)
+# library(htmlwidgets)
+# 
+# # Create an interactive map
+# map <- leaflet(monitoring_sites_with_coords) %>%
+#   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%  # Use a clean basemap
+#   setView(lng = mean(monitoring_sites_with_coords$longitude, na.rm = TRUE),
+#           lat = mean(monitoring_sites_with_coords$latitude, na.rm = TRUE),
+#           zoom = 11) 
+# 
+# # Add markers with popup information and labels
+# map <- map %>% 
+#   addCircleMarkers(
+#     lng = ~longitude,
+#     lat = ~latitude,
+#     radius = 9,
+#     color = "darkred",
+#     fillOpacity = 0.8,
+#     popup = ~paste("<b>ID:</b>", Site, "<br>",
+#                   "<b>Location:</b>", Location),
+#     label = ~as.character(Site)
+#   ) %>%
+#   addLegend(
+#     position = "bottomright",
+#     title = "O'Hare Noise Monitoring Sites",
+#     colors = "darkred",
+#     labels = "Monitoring Station"
+#   )
+# 
+# saveWidget(map, file = "map.html", selfcontained = TRUE)
+htmltools::tags$iframe(src = "map.html", width = "80%", height = "500")
+```
+
+## Visualize the distribution of aircraft noise events by hour of the day.
+  - Convert `Max_Time` to a time object and extract the hour:
+    - Use `as_hms()` from the **hms** package to convert `Max_Time` (assumed in "HH:MM:SS" format) into a time object.
+    - Use `hour()` from the **lubridate** package to extract the hour and store it in a new column (`event_hour`).
+  - Filter out rows with missing `event_hour` values: 
+    - Remove any rows where `event_hour` is `NA` to ensure only valid events are analyzed.
+  - Plot a histogram of events by hour:  
+    - Use **ggplot2** to create a histogram with one-hour bins.
+    - Label the x-axis as "Hour of Day" and the y-axis as "Number of Events".
+    - Configure the x-axis to show all hours from 0 to 23.
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(lubridate)
+library(hms)  # for as_hms() if your time data is in a character format
+
+# Assuming the 'Time' column exists in aircraft_only and is in "HH:MM:SS" format,
+# extract the hour of the event
+aircraft_only <- aircraft_only %>% 
+  mutate(event_hour = hour(as_hms(Max_Time)))
+
+aircraft_only <- aircraft_only %>% filter(!is.na(event_hour))
+
+# Create the histogram of events by hour of the day
+ggplot(aircraft_only, aes(x = event_hour)) +
+  geom_histogram(binwidth = 1, fill = "darkred", color = "darkgray") +
+  labs(title = "Airplane Noise Events by Hour of Day",
+       x = "Hour of Day",
+       y = "Number of Events") +
+  scale_x_continuous(breaks = 0:23)
+```
+
+## Process and Merge Noise Event Data for Mapping Number of Noise Events at each station
+- Removes any existing `noise_events` column to prevent duplicates.
+- Groups `aircraft_only` by `Location_ID` and counts events to create an `event_counts` summary.
+- Merges `event_counts` with `monitoring_sites_with_coords` by matching `Site` with `Location_ID` and replaces missing values with 0.
+- Creates a numeric color palette ("YlOrRd") to map noise event counts to colors.
+- Builds an interactive Leaflet map with circle markers colored by noise events 
+
+```{r}
+# # Remove any existing noise_events column to avoid duplicates
+# if("noise_events" %in% names(monitoring_sites_with_coords)) {
+#   monitoring_sites_with_coords <- monitoring_sites_with_coords %>% select(-noise_events)
+# }
+# 
+# # Summarize the number of noise events for each monitoring station
+# event_counts <- aircraft_only %>%
+#   group_by(Location_ID) %>%
+#   summarize(noise_events = n(), .groups = "drop")
+# 
+# # Merge the event counts into the monitoring sites data by matching 'Site' with 'Location_ID'
+# monitoring_sites_with_coords <- monitoring_sites_with_coords %>%
+#   left_join(event_counts, by = c("Site" = "Location_ID")) %>%
+#   # Replace NA with 0 for stations with no events
+#   mutate(noise_events = if_else(is.na(noise_events), 0L, noise_events))
+# 
+# 
+# # Create a color palette based on the number of noise events
+# pal <- colorNumeric(
+#   palette = "YlOrRd",  # yellow-to-red palette; you can choose another palette if desired
+#   domain = monitoring_sites_with_coords$noise_events
+# )
+# 
+# # Create an interactive map with markers colored based on noise events
+# map_2 <- leaflet(monitoring_sites_with_coords) %>%
+#   addProviderTiles(providers$OpenStreetMap.Mapnik) %>%  # Use a clean basemap
+#   setView(lng = mean(monitoring_sites_with_coords$longitude, na.rm = TRUE),
+#           lat = mean(monitoring_sites_with_coords$latitude, na.rm = TRUE),
+#           zoom = 11) %>%
+#   addCircleMarkers(
+#     lng = ~longitude,
+#     lat = ~latitude,
+#     radius = 9,
+#     color = "black",             # Marker border color
+#     fillColor = ~pal(noise_events),# Fill color based on noise events
+#     fillOpacity = 0.8,
+#     popup = ~paste("<b>ID:</b>", Site, "<br>",
+#                    "<b>Location:</b>", Location, "<br>",
+#                    "<b>Noise Events:</b>", noise_events),
+#     label = ~as.character(Site)
+#   ) %>%
+#   addLegend(
+#     position = "bottomright",
+#     pal = pal,
+#     values = ~noise_events,
+#     title = "Noise Events",
+#     opacity = 1
+#   )
+# 
+# saveWidget(map_2, file = "map_2.html", selfcontained = TRUE)
+htmltools::tags$iframe(src = "map_2.html", width = "80%", height = "500")
+```
+
+## Animate Noise Contours by Hour
+- Converts `Max_Time` into a time object and extracts the hour into a new column (`event_hour`).
+- For each hour (0–23):
+  - Filters noise events for that hour.
+  - Computes the average SEL per station (grouped by `Location_ID`).
+  - Merges these averages with monitoring site coordinates.
+  - Performs IDW interpolation to create a grid of predicted SEL values.
+- Combines all hourly interpolated grids into one data frame (`all_frames`).
+- Uses ggplot2 to build an animated contour map:
+  - Plots the predicted SEL as a raster with overlaid contour lines.
+  - Overlays monitoring station points (in red).
+  - Sets coordinate limits to the full data range.
+  - Animates the plot by hour with gganimate.
+- Saves the final animated GIF as "noise_contour.gif".
+
+```{r}
+# library(gganimate)
+# 
+# # Ensure the aircraft_only dataset has an event_hour column based on Max_Time
+# aircraft_only <- aircraft_only %>%
+#   mutate(event_hour = hour(as_hms(Max_Time)))
+# 
+# # Create a list to store the interpolated data for each hour
+# frames <- list()
+# 
+# # Loop over each hour (0 to 23)
+# for (hr in 0:23) {
+# 
+#   # Filter events for the current hour
+#   data_hour <- aircraft_only %>% filter(event_hour == hr)
+# 
+#   # Summarize SEL for each station for the current hour
+#   sel_summary <- data_hour %>%
+#     group_by(Location_ID) %>%
+#     summarize(avg_SEL = mean(SEL, na.rm = TRUE), .groups = "drop")
+# 
+#   # Merge SEL summary with monitoring sites (matching Site with Location_ID)
+#   station_data <- monitoring_sites_with_coords %>%
+#     left_join(sel_summary, by = c("Site" = "Location_ID")) %>%
+#     mutate(avg_SEL = if_else(is.na(avg_SEL), 0, avg_SEL))
+# 
+#   # Convert merged data to a spatial object (assuming WGS84: longitude/latitude)
+#   coordinates(station_data) <- ~longitude+latitude
+#   proj4string(station_data) <- CRS("+proj=longlat +datum=WGS84")
+# 
+#   # Create an interpolation grid over the area spanned by the stations
+#   x_range <- range(station_data@coords[,1])
+#   y_range <- range(station_data@coords[,2])
+#   grd <- expand.grid(
+#     x = seq(from = x_range[1], to = x_range[2], length.out = 100),
+#     y = seq(from = y_range[1], to = y_range[2], length.out = 100)
+#   )
+#   coordinates(grd) <- ~x+y
+#   gridded(grd) <- TRUE
+#   proj4string(grd) <- CRS("+proj=longlat +datum=WGS84")
+# 
+#   # Perform IDW interpolation on the SEL values
+#   idw_out <- idw(avg_SEL ~ 1, station_data, newdata = grd, idp = 2)
+#   idw_df <- as.data.frame(idw_out)
+#   names(idw_df)[names(idw_df) == "var1.pred"] <- "predicted_SEL"
+# 
+#   # Add the current hour to the data frame
+#   idw_df$hour <- hr
+# 
+#   # Save this frame into the list
+#   frames[[length(frames) + 1]] <- idw_df
+# }
+# 
+# # Combine all hourly frames into one data frame
+# all_frames <- bind_rows(frames)
+# 
+# # Calculate the full data range from your interpolation grid
+# x_range <- range(all_frames$x, na.rm = TRUE)
+# y_range <- range(all_frames$y, na.rm = TRUE)
+# 
+# # Use the full data range without any extra buffer
+# x_lim <- x_range
+# y_lim <- y_range
+# 
+# # Create the animated contour plot with default settings
+# p <- ggplot() +
+#   # Overlay the interpolated SEL data as a raster
+#   geom_raster(data = all_frames, aes(x = x, y = y, fill = predicted_SEL), interpolate = TRUE) +
+#   # Add contour lines for the SEL values
+#   geom_contour(data = all_frames, aes(x = x, y = y, z = predicted_SEL), color = "black", alpha = 0.5) +
+#   # Define the fill scale using viridis
+#   scale_fill_viridis(name = "Predicted SEL", option = "viridis") +
+#   # Overlay the monitoring stations as red points
+#   geom_point(data = as.data.frame(monitoring_sites_with_coords),
+#              aes(x = longitude, y = latitude),
+#              color = "red", size = 2, inherit.aes = FALSE) +
+#   # Add labels for title and axes
+#   labs(title = "Noise Contour Map at Hour: {frame_time}",
+#        x = "Longitude", y = "Latitude") +
+#   # Set coordinate limits to the full data range
+#   coord_sf(xlim = x_lim, ylim = y_lim, expand = TRUE) +
+#   theme_void() +
+#   transition_time(hour) +
+#   ease_aes('linear')
+# 
+# Filter the combined data for hour 19
+# hour17_data <- all_frames %>% filter(hour == 17)
+# 
+# # Create a static contour plot for hour 17
+# p_hour17 <- ggplot() +
+#   geom_raster(data = hour17_data, aes(x = x, y = y, fill = predicted_SEL), interpolate = TRUE) +
+#   geom_contour(data = hour17_data, aes(x = x, y = y, z = predicted_SEL), color = "black", alpha = 0.5) +
+#   scale_fill_viridis(name = "Predicted SEL", option = "viridis") +
+#   geom_point(data = as.data.frame(monitoring_sites_with_coords),
+#              aes(x = longitude, y = latitude),
+#              color = "red", size = 2, inherit.aes = FALSE) +
+#   labs(title = "Noise Contour Map at Hour: 17", x = "Longitude", y = "Latitude") +
+#   coord_sf(xlim = x_lim, ylim = y_lim, expand = TRUE) +
+#   theme_void()
+# 
+# # Save the static plot to a PNG file
+# ggsave("noise_contour_hour17.png", plot = p_hour17, width = 6, height = 3.5, dpi = 150)
+# 
+# # Animate with high resolution (1200x1200 pixels at 300 dpi)
+# anim <- gganimate::animate(p, nframes = 24, fps = 1, width = 600, height = 350, res = 150, renderer = gifski_renderer())
+# 
+# # Save the high-resolution GIF
+# gganimate::anim_save("noise_contour.gif", animation = anim)
+```
+```{r}
+knitr::include_graphics("noise_contour.gif")
+```
+
+## Visualize ORD Departures and Arrivals by Hour
+- Load and Filter Data
+  - Reads departure data from "ORD_Departures_10272024.csv" and filters for flights originating at ORD.
+  - Reads arrival data from the same file and filters for flights destined for ORD.
+- Parse and Plot Departure Hours
+  - Extracts the departure hour from `DEP_TIME` by dividing by 100 and taking the floor.
+  - Filters out rows with missing or out-of-range (0–23) hours.
+  - Creates a histogram of departures by hour with blue bars.
+- Parse and Plot Arrival Hours
+  - Extracts the arrival hour from `ARR_TIME` by dividing by 100 and taking the floor.
+  - Filters out rows with missing or out-of-range (0–23) hours.
+  - Creates a histogram of arrivals by hour with dark green bars.
+
+```{r}
+departures <- suppressWarnings(read_csv("ORD_Departures_10272024.csv", show_col_types = FALSE))
+departures <- departures %>%
+  filter(ORIGIN == "ORD")
+
+arrivals <- suppressWarnings(read_csv("ORD_Departures_10272024.csv", show_col_types = FALSE))
+arrivals <- arrivals %>%
+  filter(DEST == "ORD")
+
+# Load required packages
+library(tidyverse)
+
+# --- Step 1: Parse the departure hour ---
+# For departures, extract hour by dividing DEP_TIME by 100 and taking the integer part.
+# Then, filter out rows with missing or out-of-range (not between 0 and 23) hours.
+departures <- departures %>%
+  mutate(dep_hour = floor(DEP_TIME / 100)) %>%
+  filter(!is.na(dep_hour), dep_hour >= 0, dep_hour <= 23)
+
+# Create a histogram of departures by hour of day
+ggplot(departures, aes(x = dep_hour)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "white") +
+  labs(title = "Departures from ORD by Hour of Day",
+       x = "Hour of Day",
+       y = "Number of Departures") +
+  scale_x_continuous(breaks = 0:23, limits = c(0, 24)) +
+  theme_minimal()
+
+# --- Step 2: Parse the arrival hour ---
+# For arrivals, extract the hour from ARR_TIME and filter out any rows with missing or out-of-range hours.
+arrivals <- arrivals %>%
+  mutate(arr_hour = floor(ARR_TIME / 100)) %>%
+  filter(!is.na(arr_hour), arr_hour >= 0, arr_hour <= 23)
+
+# Create a histogram of arrivals by hour of day
+ggplot(arrivals, aes(x = arr_hour)) +
+  geom_histogram(binwidth = 1, fill = "darkgreen", color = "white") +
+  labs(title = "Arrivals at ORD by Hour of Day",
+       x = "Hour of Day",
+       y = "Number of Arrivals") +
+  scale_x_continuous(breaks = 0:23, limits = c(0, 24)) +
+  theme_minimal()
+```
+
+## Animate AA760 Flight Track on Satellite Basemap
+- Registers the Google API key and loads AA760 flight track data, appending the date and converting time.
+- Retrieves a Google satellite basemap for a computed bounding box.
+- Overlays the flight track as a red path and points on the basemap and animates its reveal over time.
+- Saves the high-resolution GIF "AA760_departure_satellite.gif".
+
+```{r}
+# # Register your Google API key
+# register_google(key = "AIzaSyD_gCx9snMJPqOAT16qcmP767tYEQCcS80")
+# 
+# # Load the AA760 flight track data
+# AA760 <- suppressWarnings(read_csv("AA760Track.csv", show_col_types = FALSE))
+# 
+# AA760 <- AA760 %>%
+#   mutate(
+#     Time = paste("2024-10-27", Time),
+#     Time = as.POSIXct(Time, format = "%Y-%m-%d %H:%M:%S", tz = "America/Chicago")
+#   ) %>%
+#   filter(!is.na(Time)) %>%
+#   arrange(Time)
+# 
+# # Compute a bounding box for the track (with a small buffer)
+# lon_min <- min(AA760$Longitude, na.rm = TRUE) - 0.02
+# lon_max <- max(AA760$Longitude, na.rm = TRUE) - 0.01
+# lat_min <- min(AA760$Latitude, na.rm = TRUE) + 0.05
+# lat_max <- 42
+# bbox <- c(lon_min, lat_min, lon_max, lat_max)
+# 
+# # Fetch a satellite basemap from Google (using "satellite" style) for the bounding box
+# basemap <- get_map(location = bbox, source = "google", maptype = "satellite", zoom = 11)
+# if (is.null(basemap)) stop("Basemap is null. Check your bounding box or network connection.")
+# 
+# # Build the ggplot object with the basemap and flight track overlay,
+# # and use transition_reveal to animate the track being drawn over time.
+# p <- ggmap(basemap) +
+#   geom_path(data = AA760, aes(x = Longitude, y = Latitude), color = "red", size = 1) +
+#   geom_point(data = AA760, aes(x = Longitude, y = Latitude), color = "red", size = 2) +
+#   transition_reveal(Time) +
+#   labs(title = "AA760 Departing ORD",
+#        x = "Longitude", y = "Latitude") +
+#   theme_minimal()
+# 
+# # Animate the plot (14 frames, 1 fps, high resolution) and save as a GIF
+# anim <- gganimate::animate(p, nframes = 14, fps = 1, width = 1200, height = 900, renderer = gifski_renderer())
+# gganimate::anim_save("AA760_departure_satellite.gif", animation = anim)
+knitr::include_graphics("AA760_departure_satellite.gif")
+```
+
+## Combined AA760 Flight & Noise Animation
+- Processes AA760 flight track data: appends date, converts time, filters, and orders.
+- Computes a buffered bounding box and fetches a Google satellite basemap.
+- Filters monitoring stations within the bounding box.
+- Processes noise events: converts start times and filters events during AA760's departure window.
+- Builds station status over time by flagging noise events at each station (red if active, green otherwise).
+- Overlays the flight track (with cumulative shadow) and station status on the basemap, then animates over time.
+- Saves and displays the final GIF ("Combined_Noise_Flight.gif").
+
+```{r}
+# ### Process AA760 Flight Track Data ###
+# AA760 <- suppressWarnings(read_csv("AA760Track.csv", show_col_types = FALSE)) %>%
+#   mutate(
+#     # Append the date "2024-10-27" to the Time string (assumed to be in "HH:MM:SS" 24-hour format)
+#     Time = paste("2024-10-27", Time),
+#     Time = as.POSIXct(Time, format = "%Y-%m-%d %H:%M:%S", tz = "America/Chicago"),
+#     t = Time  # common time variable for animation
+#   ) %>%
+#   filter(!is.na(Time)) %>%
+#   arrange(Time)
+# 
+# ### Compute Bounding Box (with Buffer) ###
+# lon_min <- min(AA760$Longitude, na.rm = TRUE) - 0.02
+# lon_max <- max(AA760$Longitude, na.rm = TRUE) - 0.01
+# lat_min <- min(AA760$Latitude, na.rm = TRUE) + 0.15
+# lat_max <- max(AA760$Latitude, na.rm = TRUE) + 0.05
+# bbox <- c(lon_min, lat_min, lon_max, lat_max)
+# 
+# ### Fetch Google Satellite Basemap ###
+# basemap <- get_map(location = bbox, source = "google", maptype = "satellite", zoom = 12)
+# if (is.null(basemap)) stop("Basemap is null. Check your bounding box or network connection.")
+# 
+# ### Process Monitoring Stations ###
+# # monitoring_sites_with_coords must have columns: Site (ID), longitude, latitude.
+# stations <- monitoring_sites_with_coords %>%
+#   filter(longitude >= lon_min, longitude <= lon_max,
+#          latitude  >= lat_min,  latitude  <= lat_max)
+# 
+# ### Process Noise Events ###
+# # Load noise event data (aircraft_only) and parse Start_Time (assumed "HH:MM:SS" in 24-hour format)
+# noise_events <- aircraft_only %>%
+#   mutate(
+#     Start_Time = paste("2024-10-27", Start_Time),
+#     Start_Time = as.POSIXct(Start_Time, format = "%Y-%m-%d %H:%M:%S", tz = "America/Chicago")
+#   ) %>%
+#   filter(!is.na(Start_Time)) %>%
+#   # Only include events during the AA760 departure window
+#   filter(Start_Time >= min(AA760$Time) -60 & Start_Time <= max(AA760$Time)+120)
+# 
+# ### Build Station Status Over Time ###
+# # Create a sequence of times from 1 minute before AA760's start until its end (every 10 seconds)
+# time_seq <- seq(from = min(AA760$Time) - 60, to = max(AA760$Time)-120, by = 10)
+# 
+# # For each station (using monitoring_sites_with_coords as the sole source of coordinates),
+# # check at each sampled time if a noise event (from noise_events) occurs within ±10 seconds.
+# station_status <- stations %>%
+#   group_by(Site, longitude, latitude) %>%
+#   do({
+#     stn <- .
+#     data.frame(
+#       Site = stn$Site,
+#       longitude = stn$longitude,
+#       latitude  = stn$latitude,
+#       t = time_seq,
+#       noise = sapply(time_seq, function(ft) {
+#         events <- noise_events %>% filter(Location_ID == stn$Site)
+#         if (nrow(events) > 0) {
+#           # Check if any event is within 15 seconds of the frame time ft
+#           any(abs(as.numeric(difftime(ft, events$Start_Time + 90, units = "secs"))) <= 15)
+#         } else {
+#           FALSE
+#         }
+#       })
+#     )
+#   }) %>% ungroup() %>%
+#   mutate(color = ifelse(noise, "red", "green"))
+# 
+# 
+# ### Build Combined Animated Plot ###
+# # We'll use transition_time(t) as the common time axis.
+# # For the flight track, we use shadow_mark() so that earlier points remain visible,
+# # which creates a cumulative effect.
+# p_combined <- ggmap(basemap) +
+#   # Flight track layer: drawn with shadow_mark() to show cumulative path.
+#   geom_path(data = AA760, aes(x = Longitude, y = Latitude), color = "cyan", size = 3) +
+#   geom_point(data = AA760, aes(x = Longitude, y = Latitude), color = "cyan", size = 3) +
+#   shadow_mark(past = TRUE, future = FALSE, alpha = 1) +
+#   # Station base layer: plotted as green points (optional, faint)
+#   geom_point(data = stations, aes(x = longitude, y = latitude), color = "green", size = 4, alpha = 0.3) +
+#   # Station status overlay: dynamic layer from station_status, using the color column
+#   geom_point(data = station_status, aes(x = longitude, y = latitude, color = color), size = 6) +
+#   scale_color_identity() +
+#   transition_time(t) +
+#   labs(title = "AA760 Flight and Noise Monitoring Stations Activation",
+#        x = "Longitude", y = "Latitude") +
+#   theme_minimal() +
+#   coord_quickmap(xlim = c(lon_min, lon_max), ylim = c(lat_min, lat_max))
+# 
+# ### Animate and Save ###
+# # Here, nframes equals the length of our time sequence.
+# anim <- gganimate::animate(p_combined, nframes = length(time_seq) - 5, fps = 1, renderer = gifski_renderer())
+# gganimate::anim_save("Combined_Noise_Flight.gif", animation = anim)
+knitr::include_graphics("Combined_Noise_Flight.gif")
+```
+```{r}
+housing_data <- suppressWarnings(read_csv('Housing_data.csv',show_col_types = FALSE) %>% 
+  select(PRICE, LATITUDE, LONGITUDE))
+
+housing_data2 <- suppressWarnings(read_csv('Housing_data_2.csv',show_col_types = FALSE) %>% 
+  select(PRICE, LATITUDE, LONGITUDE))
+
+housing_data <- bind_rows(housing_data, housing_data2)
+
+# Register your Google API key
+register_google(key = "AIzaSyD_gCx9snMJPqOAT16qcmP767tYEQCcS80")
+
+library(akima)
+
+housing_data <- housing_data %>% 
+  filter(!is.na(LONGITUDE), !is.na(LATITUDE), !is.na(PRICE),
+         is.finite(LONGITUDE), is.finite(LATITUDE), is.finite(PRICE))
+
+# Create an interpolation grid using akima::interp
+interp_result <- with(housing_data, 
+  akima::interp(x = LONGITUDE, y = LATITUDE, z = PRICE, duplicate = "mean",
+                xo = seq(min(LONGITUDE), max(LONGITUDE), length = 100),
+                yo = seq(min(LATITUDE), max(LATITUDE), length = 100))
+)
+
+# Convert the interpolated results to a data frame
+interp_df <- expand.grid(LONGITUDE = interp_result$x, LATITUDE = interp_result$y)
+interp_df$PRICE <- as.vector(interp_result$z)
+
+# Calculate the bounding box from housing data with a small buffer
+lon_range <- range(housing_data$LONGITUDE, na.rm = TRUE)
+lat_range <- range(housing_data$LATITUDE, na.rm = TRUE)
+bbox <- c(left = lon_range[1] - 0.01,
+          bottom = lat_range[1] - 0.01,
+          right = lon_range[2] + 0.01,
+          top = lat_range[2] + 0.01)
+
+# Fetch a satellite basemap from Google
+basemap <- get_map(location = bbox, source = "google", maptype = "satellite", zoom = 12)
+
+# Create a continuous heatmap overlay of housing prices on the satellite basemap
+p <- ggmap(basemap) +
+  geom_tile(data = interp_df, aes(x = LONGITUDE, y = LATITUDE, fill = PRICE), 
+            alpha = 0.75) +
+  scale_fill_viridis_c(name = "Average Price", option = "viridis") +
+  labs(title = "Housing Prices Heatmap", x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+print(p)
+
+
+```
+
