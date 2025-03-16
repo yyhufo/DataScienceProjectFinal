@@ -1,0 +1,9 @@
+name: "Geospatial Data Science Final Project"
+navbar:
+  title: "Mapping Noise Polution at Chicago O'Hare Airport"
+  left:
+    - text: "Results & Discussion"
+      href: results.html
+    - text: "Source Code"
+      href: sourceCode.html
+

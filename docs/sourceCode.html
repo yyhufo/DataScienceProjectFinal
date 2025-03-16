@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Source Code with Comments</title>
+
+<script src="site_libs/header-attrs-2.28/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Mapping Noise Polution at Chicago O'Hare Airport</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="results.html">Results &amp; Discussion</a>
+</li>
+<li>
+  <a href="sourceCode.html">Source Code</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Source Code with Comments</h1>
+
+</div>
+
+
+<div
+id="note-chunks-of-code-have-been-commented-to-improve-website-kniting-performance."
+class="section level2">
+<h2>NOTE: Chunks of code have been commented to improve website kniting
+performance.</h2>
+</div>
+<div id="data-loading" class="section level2">
+<h2>Data loading</h2>
+<ul>
+<li>Reads the events data from
+<code>ORD_Single_Event_10272024.csv</code>.</li>
+<li>Filters the events to retain only those where
+<code>Classification</code> equals “Aircraft” (focusing on aircraft
+noise events).</li>
+<li>Reads monitoring site data from
+<code>O_Hare_Noise_Monitoring_Sites.csv</code> and uses
+<code>glimpse()</code> to quickly inspect its structure.</li>
+</ul>
+<pre class="r"><code># Read the csv file
+data &lt;- suppressWarnings(read_csv(&quot;ORD_Single_Event_10272024.csv&quot;, show_col_types = FALSE))
+
+# Filter the data to only include aircraft noises
+aircraft_only &lt;- data %&gt;%
+  filter(Classification == &quot;Aircraft&quot;)
+
+monitoring_sites &lt;- suppressWarnings(read_csv(&quot;O_Hare_Noise_Monitoring_Sites.csv&quot;, show_col_types = FALSE))
+glimpse(monitoring_sites)</code></pre>
+<pre><code>## Rows: 40
+## Columns: 2
+## $ Site     &lt;dbl&gt; 1, 2, 3, 31, 4, 28, 5, 11, 39, 40, 42, 46, 12, 13, 14, 34, 10…
+## $ Location &lt;chr&gt; &quot;805 W. Victoria Lane, Arlington Heights&quot;, &quot;1700 Bloomingdale…</code></pre>
+</div>
+<div id="geocode-the-addresses" class="section level2">
+<h2>Geocode the addresses</h2>
+<ul>
+<li>Uses the <code>tidygeocoder</code> package (with the OpenStreetMap
+geocoding method) to convert the addresses in the <code>Location</code>
+column into geographic coordinates.</li>
+<li>The new latitude and longitude values are stored in the columns
+<code>latitude</code> and <code>longitude</code>.</li>
+<li>Uses <code>glimpse()</code> to inspect the updated dataset including
+the new coordinate columns.</li>
+</ul>
+<pre class="r"><code>monitoring_sites &lt;- monitoring_sites %&gt;% mutate(Location = as.character(Location))
+monitoring_sites_with_coords &lt;- monitoring_sites %&gt;%
+  tidygeocoder::geocode(Location, method = &#39;osm&#39;, lat = latitude, long = longitude)</code></pre>
+<pre><code>## Passing 40 addresses to the Nominatim single address geocoder</code></pre>
+<pre><code>## Query completed in: 40.2 seconds</code></pre>
+<pre class="r"><code># Check the results
+glimpse(monitoring_sites_with_coords)</code></pre>
+<pre><code>## Rows: 40
+## Columns: 4
+## $ Site      &lt;dbl&gt; 1, 2, 3, 31, 4, 28, 5, 11, 39, 40, 42, 46, 12, 13, 14, 34, 1…
+## $ Location  &lt;chr&gt; &quot;805 W. Victoria Lane, Arlington Heights&quot;, &quot;1700 Bloomingdal…
+## $ latitude  &lt;dbl&gt; 42.05424, 41.91157, 41.95971, 41.96466, 41.94744, 41.96868, …
+## $ longitude &lt;dbl&gt; -87.99210, -87.85486, -87.94435, -87.95474, -87.87291, -87.8…</code></pre>
+</div>
+<div id="checking-if-any-address-failed-to-geocode"
+class="section level2">
+<h2>Checking if any address failed to geocode</h2>
+<ul>
+<li>Filters the geocoded data to show only those rows where either
+<code>latitude</code> or <code>longitude</code> is missing, so you can
+identify addresses that didn’t geocode properly.</li>
+<li>Selects and displays key columns (<code>Site</code>,
+<code>Location</code>, <code>latitude</code>, <code>longitude</code>)
+for these problematic addresses.</li>
+<li>Counts and prints the number of failed geocoding attempts using
+<code>cat()</code>, so you’re aware of the overall geocoding success
+rate.</li>
+</ul>
+<pre class="r"><code># Show addresses that failed to geocode
+monitoring_sites_with_coords %&gt;%
+  filter(is.na(latitude) | is.na(longitude)) %&gt;%
+  select(Site, Location, latitude, longitude)</code></pre>
+<pre><code>## # A tibble: 3 × 4
+##    Site Location                                 latitude longitude
+##   &lt;dbl&gt; &lt;chr&gt;                                       &lt;dbl&gt;     &lt;dbl&gt;
+## 1    13 1601 Nicholas Avenue, Elk Grove Village        NA        NA
+## 2    37 1835 Wood Ln, Mt Prospect, IL 60056, USA       NA        NA
+## 3    45 7990 W Keeney St, Niles, IL 60714, USA         NA        NA</code></pre>
+<pre class="r"><code># Count how many addresses failed to geocode
+na_count &lt;- monitoring_sites_with_coords %&gt;%
+  filter(is.na(latitude) | is.na(longitude)) %&gt;%
+  nrow()
+
+cat(&quot;Number of addresses that failed to geocode:&quot;, na_count, &quot;out of&quot;, nrow(monitoring_sites_with_coords), &quot;\n&quot;)</code></pre>
+<pre><code>## Number of addresses that failed to geocode: 3 out of 40</code></pre>
+</div>
+<div
+id="hardcode-the-latitude-and-longitude-for-failed-geocoding-addresses"
+class="section level2">
+<h2>Hardcode the latitude and longitude for failed geocoding
+addresses</h2>
+<ul>
+<li>Uses <code>mutate()</code> along with <code>case_when()</code> to
+manually fill in the missing latitude and longitude values for specific
+addresses (the ones that failed geocoding) using values obtained from
+Google Maps.</li>
+<li>The logic checks if the <code>Location</code> matches one of the
+known problematic addresses and then hardcodes the correct
+coordinates.</li>
+<li>Finally, it sums up any remaining missing coordinate values to
+verify that the manual correction was successful.</li>
+</ul>
+<pre class="r"><code>monitoring_sites_with_coords &lt;- monitoring_sites_with_coords %&gt;%
+  mutate(
+    latitude = case_when(
+      Location == &quot;1601 Nicholas Avenue, Elk Grove Village&quot; ~ 42.00381844250957,
+      Location == &quot;1835 Wood Ln, Mt Prospect, IL 60056, USA&quot; ~ 42.09381165237296,
+      Location == &quot;7990 W Keeney St, Niles, IL 60714, USA&quot; ~ 42.02796143660958,
+      TRUE ~ latitude
+    ),
+    longitude = case_when(
+      Location == &quot;1601 Nicholas Avenue, Elk Grove Village&quot; ~ -87.94840686076198,
+      Location == &quot;1835 Wood Ln, Mt Prospect, IL 60056, USA&quot; ~ -87.89791031842996,
+      Location == &quot;7990 W Keeney St, Niles, IL 60714, USA&quot; ~ -87.82586597240149,
+      TRUE ~ longitude
+    )
+  )
+
+# Check for any remaining NA values
+sum(is.na(monitoring_sites_with_coords$latitude) | 
+    is.na(monitoring_sites_with_coords$longitude))</code></pre>
+<pre><code>## [1] 0</code></pre>
+</div>
+<div
+id="make-an-interactive-map-showing-where-all-the-monitoring-locations-are."
+class="section level2">
+<h2>Make an interactive map showing where all the monitoring locations
+are.</h2>
+<ul>
+<li>Loads <code>leaflet</code> and <code>htmlwidgets</code> to create an
+interactive web map.</li>
+<li>Initializes a leaflet map with the monitoring sites data, using the
+OpenStreetMap Mapnik tiles for a clean basemap.</li>
+<li>Sets the initial view of the map to the mean longitude and latitude
+of all monitoring sites (ignoring missing values), with a zoom level of
+11.</li>
+<li>Adds circle markers for each monitoring site:
+<ul>
+<li>Markers are styled (radius, color, fill opacity) and display a popup
+that includes the site ID and address.</li>
+<li>Each marker has a label that shows the site number.</li>
+</ul></li>
+<li>Adds a legend in the bottom right corner that explains the marker’s
+meaning.</li>
+<li>Finally, the interactive map is rendered for viewing.</li>
+</ul>
+<pre class="r"><code># # Load required libraries
+# library(leaflet)
+# library(htmlwidgets)
+# 
+# # Create an interactive map
+# map &lt;- leaflet(monitoring_sites_with_coords) %&gt;%
+#   addProviderTiles(providers$OpenStreetMap.Mapnik) %&gt;%  # Use a clean basemap
+#   setView(lng = mean(monitoring_sites_with_coords$longitude, na.rm = TRUE),
+#           lat = mean(monitoring_sites_with_coords$latitude, na.rm = TRUE),
+#           zoom = 11) 
+# 
+# # Add markers with popup information and labels
+# map &lt;- map %&gt;% 
+#   addCircleMarkers(
+#     lng = ~longitude,
+#     lat = ~latitude,
+#     radius = 9,
+#     color = &quot;darkred&quot;,
+#     fillOpacity = 0.8,
+#     popup = ~paste(&quot;&lt;b&gt;ID:&lt;/b&gt;&quot;, Site, &quot;&lt;br&gt;&quot;,
+#                   &quot;&lt;b&gt;Location:&lt;/b&gt;&quot;, Location),
+#     label = ~as.character(Site)
+#   ) %&gt;%
+#   addLegend(
+#     position = &quot;bottomright&quot;,
+#     title = &quot;O&#39;Hare Noise Monitoring Sites&quot;,
+#     colors = &quot;darkred&quot;,
+#     labels = &quot;Monitoring Station&quot;
+#   )
+# 
+# saveWidget(map, file = &quot;map.html&quot;, selfcontained = TRUE)
+htmltools::tags$iframe(src = &quot;map.html&quot;, width = &quot;80%&quot;, height = &quot;500&quot;)</code></pre>
+<iframe src="map.html" width="80%" height="500"></iframe>
+</div>
+<div
+id="visualize-the-distribution-of-aircraft-noise-events-by-hour-of-the-day."
+class="section level2">
+<h2>Visualize the distribution of aircraft noise events by hour of the
+day.</h2>
+<ul>
+<li>Convert <code>Max_Time</code> to a time object and extract the hour:
+<ul>
+<li>Use <code>as_hms()</code> from the <strong>hms</strong> package to
+convert <code>Max_Time</code> (assumed in “HH:MM:SS” format) into a time
+object.</li>
+<li>Use <code>hour()</code> from the <strong>lubridate</strong> package
+to extract the hour and store it in a new column
+(<code>event_hour</code>).</li>
+</ul></li>
+<li>Filter out rows with missing <code>event_hour</code> values:
+<ul>
+<li>Remove any rows where <code>event_hour</code> is <code>NA</code> to
+ensure only valid events are analyzed.</li>
+</ul></li>
+<li>Plot a histogram of events by hour:
+<ul>
+<li>Use <strong>ggplot2</strong> to create a histogram with one-hour
+bins.</li>
+<li>Label the x-axis as “Hour of Day” and the y-axis as “Number of
+Events”.</li>
+<li>Configure the x-axis to show all hours from 0 to 23.</li>
+</ul></li>
+</ul>
+<pre class="r"><code># Load necessary libraries
+library(ggplot2)
+library(lubridate)
+library(hms)
+
+# Assuming the &#39;Time&#39; column exists in aircraft_only and is in &quot;HH:MM:SS&quot; format,
+# extract the hour of the event
+aircraft_only &lt;- aircraft_only %&gt;% 
+  mutate(event_hour = hour(as_hms(Max_Time)))
+
+aircraft_only &lt;- aircraft_only %&gt;% filter(!is.na(event_hour))
+
+# Create the histogram of events by hour of the day
+ggplot(aircraft_only, aes(x = event_hour)) +
+  geom_histogram(binwidth = 1, fill = &quot;darkred&quot;, color = &quot;darkgray&quot;) +
+  labs(title = &quot;Airplane Noise Events by Hour of Day&quot;,
+       x = &quot;Hour of Day&quot;,
+       y = &quot;Number of Events&quot;) +
+  scale_x_continuous(breaks = 0:23)</code></pre>
+<p><img src="sourceCode_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div
+id="process-and-merge-noise-event-data-for-mapping-number-of-noise-events-at-each-station"
+class="section level2">
+<h2>Process and Merge Noise Event Data for Mapping Number of Noise
+Events at each station</h2>
+<ul>
+<li>Removes any existing <code>noise_events</code> column to prevent
+duplicates.</li>
+<li>Groups <code>aircraft_only</code> by <code>Location_ID</code> and
+counts events to create an <code>event_counts</code> summary.</li>
+<li>Merges <code>event_counts</code> with
+<code>monitoring_sites_with_coords</code> by matching <code>Site</code>
+with <code>Location_ID</code> and replaces missing values with 0.</li>
+<li>Creates a numeric color palette (“YlOrRd”) to map noise event counts
+to colors.</li>
+<li>Builds an interactive Leaflet map with circle markers colored by
+noise events</li>
+</ul>
+<pre class="r"><code># # Remove any existing noise_events column to avoid duplicates
+# if(&quot;noise_events&quot; %in% names(monitoring_sites_with_coords)) {
+#   monitoring_sites_with_coords &lt;- monitoring_sites_with_coords %&gt;% select(-noise_events)
+# }
+# 
+# # Summarize the number of noise events for each monitoring station
+# event_counts &lt;- aircraft_only %&gt;%
+#   group_by(Location_ID) %&gt;%
+#   summarize(noise_events = n(), .groups = &quot;drop&quot;)
+# 
+# # Merge the event counts into the monitoring sites data by matching &#39;Site&#39; with &#39;Location_ID&#39;
+# monitoring_sites_with_coords &lt;- monitoring_sites_with_coords %&gt;%
+#   left_join(event_counts, by = c(&quot;Site&quot; = &quot;Location_ID&quot;)) %&gt;%
+#   # Replace NA with 0 for stations with no events
+#   mutate(noise_events = if_else(is.na(noise_events), 0L, noise_events))
+# 
+# 
+# # Create a color palette based on the number of noise events
+# pal &lt;- colorNumeric(
+#   palette = &quot;YlOrRd&quot;,  # yellow-to-red palette; you can choose another palette if desired
+#   domain = monitoring_sites_with_coords$noise_events
+# )
+# 
+# # Create an interactive map with markers colored based on noise events
+# map_2 &lt;- leaflet(monitoring_sites_with_coords) %&gt;%
+#   addProviderTiles(providers$OpenStreetMap.Mapnik) %&gt;%  # Use a clean basemap
+#   setView(lng = mean(monitoring_sites_with_coords$longitude, na.rm = TRUE),
+#           lat = mean(monitoring_sites_with_coords$latitude, na.rm = TRUE),
+#           zoom = 11) %&gt;%
+#   addCircleMarkers(
+#     lng = ~longitude,
+#     lat = ~latitude,
+#     radius = 9,
+#     color = &quot;black&quot;,             # Marker border color
+#     fillColor = ~pal(noise_events),# Fill color based on noise events
+#     fillOpacity = 0.8,
+#     popup = ~paste(&quot;&lt;b&gt;ID:&lt;/b&gt;&quot;, Site, &quot;&lt;br&gt;&quot;,
+#                    &quot;&lt;b&gt;Location:&lt;/b&gt;&quot;, Location, &quot;&lt;br&gt;&quot;,
+#                    &quot;&lt;b&gt;Noise Events:&lt;/b&gt;&quot;, noise_events),
+#     label = ~as.character(Site)
+#   ) %&gt;%
+#   addLegend(
+#     position = &quot;bottomright&quot;,
+#     pal = pal,
+#     values = ~noise_events,
+#     title = &quot;Noise Events&quot;,
+#     opacity = 1
+#   )
+# 
+# saveWidget(map_2, file = &quot;map_2.html&quot;, selfcontained = TRUE)
+htmltools::tags$iframe(src = &quot;map_2.html&quot;, width = &quot;80%&quot;, height = &quot;500&quot;)</code></pre>
+<iframe src="map_2.html" width="80%" height="500"></iframe>
+</div>
+<div id="animate-noise-contours-by-hour" class="section level2">
+<h2>Animate Noise Contours by Hour</h2>
+<ul>
+<li>Converts <code>Max_Time</code> into a time object and extracts the
+hour into a new column (<code>event_hour</code>).</li>
+<li>For each hour (0–23):
+<ul>
+<li>Filters noise events for that hour.</li>
+<li>Computes the average SEL per station (grouped by
+<code>Location_ID</code>).</li>
+<li>Merges these averages with monitoring site coordinates.</li>
+<li>Performs IDW interpolation to create a grid of predicted SEL
+values.</li>
+</ul></li>
+<li>Combines all hourly interpolated grids into one data frame
+(<code>all_frames</code>).</li>
+<li>Uses ggplot2 to build an animated contour map:
+<ul>
+<li>Plots the predicted SEL as a raster with overlaid contour
+lines.</li>
+<li>Overlays monitoring station points (in red).</li>
+<li>Sets coordinate limits to the full data range.</li>
+<li>Animates the plot by hour with gganimate.</li>
+</ul></li>
+<li>Saves the final animated GIF as “noise_contour.gif”.</li>
+</ul>
+<pre class="r"><code># library(gganimate)
+# 
+# # Ensure the aircraft_only dataset has an event_hour column based on Max_Time
+# aircraft_only &lt;- aircraft_only %&gt;%
+#   mutate(event_hour = hour(as_hms(Max_Time)))
+# 
+# # Create a list to store the interpolated data for each hour
+# frames &lt;- list()
+# 
+# # Loop over each hour (0 to 23)
+# for (hr in 0:23) {
+# 
+#   # Filter events for the current hour
+#   data_hour &lt;- aircraft_only %&gt;% filter(event_hour == hr)
+# 
+#   # Summarize SEL for each station for the current hour
+#   sel_summary &lt;- data_hour %&gt;%
+#     group_by(Location_ID) %&gt;%
+#     summarize(avg_SEL = mean(SEL, na.rm = TRUE), .groups = &quot;drop&quot;)
+# 
+#   # Merge SEL summary with monitoring sites (matching Site with Location_ID)
+#   station_data &lt;- monitoring_sites_with_coords %&gt;%
+#     left_join(sel_summary, by = c(&quot;Site&quot; = &quot;Location_ID&quot;)) %&gt;%
+#     mutate(avg_SEL = if_else(is.na(avg_SEL), 0, avg_SEL))
+# 
+#   # Convert merged data to a spatial object (assuming WGS84: longitude/latitude)
+#   coordinates(station_data) &lt;- ~longitude+latitude
+#   proj4string(station_data) &lt;- CRS(&quot;+proj=longlat +datum=WGS84&quot;)
+# 
+#   # Create an interpolation grid over the area spanned by the stations
+#   x_range &lt;- range(station_data@coords[,1])
+#   y_range &lt;- range(station_data@coords[,2])
+#   grd &lt;- expand.grid(
+#     x = seq(from = x_range[1], to = x_range[2], length.out = 100),
+#     y = seq(from = y_range[1], to = y_range[2], length.out = 100)
+#   )
+#   coordinates(grd) &lt;- ~x+y
+#   gridded(grd) &lt;- TRUE
+#   proj4string(grd) &lt;- CRS(&quot;+proj=longlat +datum=WGS84&quot;)
+# 
+#   # Perform IDW interpolation on the SEL values
+#   idw_out &lt;- idw(avg_SEL ~ 1, station_data, newdata = grd, idp = 2)
+#   idw_df &lt;- as.data.frame(idw_out)
+#   names(idw_df)[names(idw_df) == &quot;var1.pred&quot;] &lt;- &quot;predicted_SEL&quot;
+# 
+#   # Add the current hour to the data frame
+#   idw_df$hour &lt;- hr
+# 
+#   # Save this frame into the list
+#   frames[[length(frames) + 1]] &lt;- idw_df
+# }
+# 
+# # Combine all hourly frames into one data frame
+# all_frames &lt;- bind_rows(frames)
+# 
+# # Calculate the full data range from interpolation grid
+# x_range &lt;- range(all_frames$x, na.rm = TRUE)
+# y_range &lt;- range(all_frames$y, na.rm = TRUE)
+# 
+# # Use the full data range without any extra buffer
+# x_lim &lt;- x_range
+# y_lim &lt;- y_range
+# 
+# # Create the animated contour plot with default settings
+# p &lt;- ggplot() +
+#   # Overlay the interpolated SEL data as a raster
+#   geom_raster(data = all_frames, aes(x = x, y = y, fill = predicted_SEL), interpolate = TRUE) +
+#   # Add contour lines for the SEL values
+#   geom_contour(data = all_frames, aes(x = x, y = y, z = predicted_SEL), color = &quot;black&quot;, alpha = 0.5) +
+#   # Define the fill scale using viridis
+#   scale_fill_viridis(name = &quot;Predicted SEL&quot;, option = &quot;viridis&quot;) +
+#   # Overlay the monitoring stations as red points
+#   geom_point(data = as.data.frame(monitoring_sites_with_coords),
+#              aes(x = longitude, y = latitude),
+#              color = &quot;red&quot;, size = 2, inherit.aes = FALSE) +
+#   # Add labels for title and axes
+#   labs(title = &quot;Noise Contour Map at Hour: {frame_time}&quot;,
+#        x = &quot;Longitude&quot;, y = &quot;Latitude&quot;) +
+#   # Set coordinate limits to the full data range
+#   coord_sf(xlim = x_lim, ylim = y_lim, expand = TRUE) +
+#   theme_void() +
+#   transition_time(hour) +
+#   ease_aes(&#39;linear&#39;)
+# 
+# Filter the combined data for hour 19
+# hour17_data &lt;- all_frames %&gt;% filter(hour == 17)
+# 
+# # Create a static contour plot for hour 17
+# p_hour17 &lt;- ggplot() +
+#   geom_raster(data = hour17_data, aes(x = x, y = y, fill = predicted_SEL), interpolate = TRUE) +
+#   geom_contour(data = hour17_data, aes(x = x, y = y, z = predicted_SEL), color = &quot;black&quot;, alpha = 0.5) +
+#   scale_fill_viridis(name = &quot;Predicted SEL&quot;, option = &quot;viridis&quot;) +
+#   geom_point(data = as.data.frame(monitoring_sites_with_coords),
+#              aes(x = longitude, y = latitude),
+#              color = &quot;red&quot;, size = 2, inherit.aes = FALSE) +
+#   labs(title = &quot;Noise Contour Map at Hour: 17&quot;, x = &quot;Longitude&quot;, y = &quot;Latitude&quot;) +
+#   coord_sf(xlim = x_lim, ylim = y_lim, expand = TRUE) +
+#   theme_void()
+# 
+# # Save the static plot to a PNG file
+# ggsave(&quot;noise_contour_hour17.png&quot;, plot = p_hour17, width = 6, height = 3.5, dpi = 150)
+# 
+# # Animate with high resolution (1200x1200 pixels at 300 dpi)
+# anim &lt;- gganimate::animate(p, nframes = 24, fps = 1, width = 600, height = 350, res = 150, renderer = gifski_renderer())
+# 
+# # Save the high-resolution GIF
+# gganimate::anim_save(&quot;noise_contour.gif&quot;, animation = anim)</code></pre>
+<pre class="r"><code>knitr::include_graphics(&quot;noise_contour.gif&quot;)</code></pre>
+<p><img src="noise_contour.gif" /><!-- --></p>
+</div>
+<div id="visualize-ord-departures-and-arrivals-by-hour"
+class="section level2">
+<h2>Visualize ORD Departures and Arrivals by Hour</h2>
+<ul>
+<li>Load and Filter Data
+<ul>
+<li>Reads departure data from “ORD_Departures_10272024.csv” and filters
+for flights originating at ORD.</li>
+<li>Reads arrival data from the same file and filters for flights
+destined for ORD.</li>
+</ul></li>
+<li>Parse and Plot Departure Hours
+<ul>
+<li>Extracts the departure hour from <code>DEP_TIME</code> by dividing
+by 100 and taking the floor.</li>
+<li>Filters out rows with missing or out-of-range (0–23) hours.</li>
+<li>Creates a histogram of departures by hour with blue bars.</li>
+</ul></li>
+<li>Parse and Plot Arrival Hours
+<ul>
+<li>Extracts the arrival hour from <code>ARR_TIME</code> by dividing by
+100 and taking the floor.</li>
+<li>Filters out rows with missing or out-of-range (0–23) hours.</li>
+<li>Creates a histogram of arrivals by hour with dark green bars.</li>
+</ul></li>
+</ul>
+<pre class="r"><code>departures &lt;- suppressWarnings(read_csv(&quot;ORD_Departures_10272024.csv&quot;, show_col_types = FALSE))
+departures &lt;- departures %&gt;%
+  filter(ORIGIN == &quot;ORD&quot;)
+
+arrivals &lt;- suppressWarnings(read_csv(&quot;ORD_Departures_10272024.csv&quot;, show_col_types = FALSE))
+arrivals &lt;- arrivals %&gt;%
+  filter(DEST == &quot;ORD&quot;)
+
+# Load required packages
+library(tidyverse)
+
+# --- Step 1: Parse the departure hour ---
+# For departures, extract hour by dividing DEP_TIME by 100 and taking the integer part.
+# Then, filter out rows with missing or out-of-range (not between 0 and 23) hours.
+departures &lt;- departures %&gt;%
+  mutate(dep_hour = floor(DEP_TIME / 100)) %&gt;%
+  filter(!is.na(dep_hour), dep_hour &gt;= 0, dep_hour &lt;= 23)
+
+# Create a histogram of departures by hour of day
+ggplot(departures, aes(x = dep_hour)) +
+  geom_histogram(binwidth = 1, fill = &quot;blue&quot;, color = &quot;white&quot;) +
+  labs(title = &quot;Departures from ORD by Hour of Day&quot;,
+       x = &quot;Hour of Day&quot;,
+       y = &quot;Number of Departures&quot;) +
+  scale_x_continuous(breaks = 0:23, limits = c(0, 24)) +
+  theme_minimal()</code></pre>
+<pre><code>## Warning: Removed 2 rows containing missing values or values outside the scale range
+## (`geom_bar()`).</code></pre>
+<p><img src="sourceCode_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code># --- Step 2: Parse the arrival hour ---
+# For arrivals, extract the hour from ARR_TIME and filter out any rows with missing or out-of-range hours.
+arrivals &lt;- arrivals %&gt;%
+  mutate(arr_hour = floor(ARR_TIME / 100)) %&gt;%
+  filter(!is.na(arr_hour), arr_hour &gt;= 0, arr_hour &lt;= 23)
+
+# Create a histogram of arrivals by hour of day
+ggplot(arrivals, aes(x = arr_hour)) +
+  geom_histogram(binwidth = 1, fill = &quot;darkgreen&quot;, color = &quot;white&quot;) +
+  labs(title = &quot;Arrivals at ORD by Hour of Day&quot;,
+       x = &quot;Hour of Day&quot;,
+       y = &quot;Number of Arrivals&quot;) +
+  scale_x_continuous(breaks = 0:23, limits = c(0, 24)) +
+  theme_minimal()</code></pre>
+<pre><code>## Warning: Removed 2 rows containing missing values or values outside the scale range
+## (`geom_bar()`).</code></pre>
+<p><img src="sourceCode_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+</div>
+<div id="animate-aa760-flight-track-on-satellite-basemap"
+class="section level2">
+<h2>Animate AA760 Flight Track on Satellite Basemap</h2>
+<ul>
+<li>Registers the Google API key and loads AA760 flight track data,
+appending the date and converting time.</li>
+<li>Retrieves a Google satellite basemap for a computed bounding
+box.</li>
+<li>Overlays the flight track as a red path and points on the basemap
+and animates its reveal over time.</li>
+<li>Saves the high-resolution GIF “AA760_departure_satellite.gif”.</li>
+</ul>
+<pre class="r"><code># # Register Google API key
+# register_google(key = &quot;AIzaSyD_gCx9snMJPqOAT16qcmP767tYEQCcS80&quot;)
+# 
+# # Load the AA760 flight track data
+# AA760 &lt;- suppressWarnings(read_csv(&quot;AA760Track.csv&quot;, show_col_types = FALSE))
+# 
+# AA760 &lt;- AA760 %&gt;%
+#   mutate(
+#     Time = paste(&quot;2024-10-27&quot;, Time),
+#     Time = as.POSIXct(Time, format = &quot;%Y-%m-%d %H:%M:%S&quot;, tz = &quot;America/Chicago&quot;)
+#   ) %&gt;%
+#   filter(!is.na(Time)) %&gt;%
+#   arrange(Time)
+# 
+# # Compute a bounding box for the track (with a small buffer)
+# lon_min &lt;- min(AA760$Longitude, na.rm = TRUE) - 0.02
+# lon_max &lt;- max(AA760$Longitude, na.rm = TRUE) - 0.01
+# lat_min &lt;- min(AA760$Latitude, na.rm = TRUE) + 0.05
+# lat_max &lt;- 42
+# bbox &lt;- c(lon_min, lat_min, lon_max, lat_max)
+# 
+# # Fetch a satellite basemap from Google (using &quot;satellite&quot; style) for the bounding box
+# basemap &lt;- get_map(location = bbox, source = &quot;google&quot;, maptype = &quot;satellite&quot;, zoom = 11)
+# 
+# # Build the ggplot object with the basemap and flight track overlay,
+# # and use transition_reveal to animate the track being drawn over time.
+# p &lt;- ggmap(basemap) +
+#   geom_path(data = AA760, aes(x = Longitude, y = Latitude), color = &quot;red&quot;, size = 1) +
+#   geom_point(data = AA760, aes(x = Longitude, y = Latitude), color = &quot;red&quot;, size = 2) +
+#   transition_reveal(Time) +
+#   labs(title = &quot;AA760 Departing ORD&quot;,
+#        x = &quot;Longitude&quot;, y = &quot;Latitude&quot;) +
+#   theme_minimal()
+# 
+# # Animate the plot (14 frames, 1 fps, high resolution) and save as a GIF
+# anim &lt;- gganimate::animate(p, nframes = 14, fps = 1, width = 1200, height = 900, renderer = gifski_renderer())
+# gganimate::anim_save(&quot;AA760_departure_satellite.gif&quot;, animation = anim)
+knitr::include_graphics(&quot;AA760_departure_satellite.gif&quot;)</code></pre>
+<p><img src="AA760_departure_satellite.gif" /><!-- --></p>
+</div>
+<div id="combined-aa760-flight-noise-animation" class="section level2">
+<h2>Combined AA760 Flight &amp; Noise Animation</h2>
+<ul>
+<li>Processes AA760 flight track data: appends date, converts time,
+filters, and orders.</li>
+<li>Computes a buffered bounding box and fetches a Google satellite
+basemap.</li>
+<li>Filters monitoring stations within the bounding box.</li>
+<li>Processes noise events: converts start times and filters events
+during AA760’s departure window.</li>
+<li>Builds station status over time by flagging noise events at each
+station (red if active, green otherwise).</li>
+<li>Overlays the flight track (with cumulative shadow) and station
+status on the basemap, then animates over time.</li>
+<li>Saves and displays the final GIF (“Combined_Noise_Flight.gif”).</li>
+</ul>
+<pre class="r"><code># ### Process AA760 Flight Track Data ###
+# AA760 &lt;- suppressWarnings(read_csv(&quot;AA760Track.csv&quot;, show_col_types = FALSE)) %&gt;%
+#   mutate(
+#     # Append the date &quot;2024-10-27&quot; to the Time string (assumed to be in &quot;HH:MM:SS&quot; 24-hour format)
+#     Time = paste(&quot;2024-10-27&quot;, Time),
+#     Time = as.POSIXct(Time, format = &quot;%Y-%m-%d %H:%M:%S&quot;, tz = &quot;America/Chicago&quot;),
+#     t = Time  # common time variable for animation
+#   ) %&gt;%
+#   filter(!is.na(Time)) %&gt;%
+#   arrange(Time)
+# 
+# ### Compute Bounding Box (with Buffer) ###
+# lon_min &lt;- min(AA760$Longitude, na.rm = TRUE) - 0.02
+# lon_max &lt;- max(AA760$Longitude, na.rm = TRUE) - 0.01
+# lat_min &lt;- min(AA760$Latitude, na.rm = TRUE) + 0.15
+# lat_max &lt;- max(AA760$Latitude, na.rm = TRUE) + 0.05
+# bbox &lt;- c(lon_min, lat_min, lon_max, lat_max)
+# 
+# ### Fetch Google Satellite Basemap ###
+# basemap &lt;- get_map(location = bbox, source = &quot;google&quot;, maptype = &quot;satellite&quot;, zoom = 12)
+# 
+# ### Process Monitoring Stations ###
+# # monitoring_sites_with_coords must have columns: Site (ID), longitude, latitude.
+# stations &lt;- monitoring_sites_with_coords %&gt;%
+#   filter(longitude &gt;= lon_min, longitude &lt;= lon_max,
+#          latitude  &gt;= lat_min,  latitude  &lt;= lat_max)
+# 
+# ### Process Noise Events ###
+# # Load noise event data (aircraft_only) and parse Start_Time (assumed &quot;HH:MM:SS&quot; in 24-hour format)
+# noise_events &lt;- aircraft_only %&gt;%
+#   mutate(
+#     Start_Time = paste(&quot;2024-10-27&quot;, Start_Time),
+#     Start_Time = as.POSIXct(Start_Time, format = &quot;%Y-%m-%d %H:%M:%S&quot;, tz = &quot;America/Chicago&quot;)
+#   ) %&gt;%
+#   filter(!is.na(Start_Time)) %&gt;%
+#   # Only include events during the AA760 departure window
+#   filter(Start_Time &gt;= min(AA760$Time) -60 &amp; Start_Time &lt;= max(AA760$Time)+120)
+# 
+# ### Build Station Status Over Time ###
+# # Create a sequence of times from 1 minute before AA760&#39;s start until its end (every 10 seconds)
+# time_seq &lt;- seq(from = min(AA760$Time) - 60, to = max(AA760$Time)-120, by = 10)
+# 
+# # For each station (using monitoring_sites_with_coords as the sole source of coordinates),
+# # check at each sampled time if a noise event (from noise_events) occurs within ±10 seconds.
+# station_status &lt;- stations %&gt;%
+#   group_by(Site, longitude, latitude) %&gt;%
+#   do({
+#     stn &lt;- .
+#     data.frame(
+#       Site = stn$Site,
+#       longitude = stn$longitude,
+#       latitude  = stn$latitude,
+#       t = time_seq,
+#       noise = sapply(time_seq, function(ft) {
+#         events &lt;- noise_events %&gt;% filter(Location_ID == stn$Site)
+#         if (nrow(events) &gt; 0) {
+#           # Check if any event is within 15 seconds of the frame time ft
+#           any(abs(as.numeric(difftime(ft, events$Start_Time + 90, units = &quot;secs&quot;))) &lt;= 15)
+#         } else {
+#           FALSE
+#         }
+#       })
+#     )
+#   }) %&gt;% ungroup() %&gt;%
+#   mutate(color = ifelse(noise, &quot;red&quot;, &quot;green&quot;))
+# 
+# 
+# ### Build Combined Animated Plot ###
+# # Use transition_time(t) as the common time axis.
+# # For the flight track, use shadow_mark() so that earlier points remain visible,
+# # which creates a cumulative effect.
+# p_combined &lt;- ggmap(basemap) +
+#   # Flight track layer: drawn with shadow_mark() to show cumulative path.
+#   geom_path(data = AA760, aes(x = Longitude, y = Latitude), color = &quot;cyan&quot;, size = 3) +
+#   geom_point(data = AA760, aes(x = Longitude, y = Latitude), color = &quot;cyan&quot;, size = 3) +
+#   shadow_mark(past = TRUE, future = FALSE, alpha = 1) +
+#   # Station base layer: plotted as green points (optional, faint)
+#   geom_point(data = stations, aes(x = longitude, y = latitude), color = &quot;green&quot;, size = 4, alpha = 0.3) +
+#   # Station status overlay: dynamic layer from station_status, using the color column
+#   geom_point(data = station_status, aes(x = longitude, y = latitude, color = color), size = 6) +
+#   scale_color_identity() +
+#   transition_time(t) +
+#   labs(title = &quot;AA760 Flight and Noise Monitoring Stations Activation&quot;,
+#        x = &quot;Longitude&quot;, y = &quot;Latitude&quot;) +
+#   theme_minimal() +
+#   coord_quickmap(xlim = c(lon_min, lon_max), ylim = c(lat_min, lat_max))
+# 
+# ### Animate and Save ###
+# # Here, nframes equals the length of our time sequence.
+# anim &lt;- gganimate::animate(p_combined, nframes = length(time_seq) - 5, fps = 1, renderer = gifski_renderer())
+# gganimate::anim_save(&quot;Combined_Noise_Flight.gif&quot;, animation = anim)
+knitr::include_graphics(&quot;Combined_Noise_Flight.gif&quot;)</code></pre>
+<p><img src="Combined_Noise_Flight.gif" /><!-- --></p>
+<pre class="r"><code>housing_data &lt;- suppressWarnings(read_csv(&#39;Housing_data.csv&#39;,show_col_types = FALSE) %&gt;% 
+  select(PRICE, LATITUDE, LONGITUDE))
+
+housing_data2 &lt;- suppressWarnings(read_csv(&#39;Housing_data_2.csv&#39;,show_col_types = FALSE) %&gt;% 
+  select(PRICE, LATITUDE, LONGITUDE))
+
+housing_data &lt;- bind_rows(housing_data, housing_data2)
+
+# Register Google API key
+register_google(key = &quot;AIzaSyD_gCx9snMJPqOAT16qcmP767tYEQCcS80&quot;)
+
+library(akima)</code></pre>
+<pre><code>## Warning: package &#39;akima&#39; was built under R version 4.3.3</code></pre>
+<pre class="r"><code>housing_data &lt;- housing_data %&gt;% 
+  filter(!is.na(LONGITUDE), !is.na(LATITUDE), !is.na(PRICE),
+         is.finite(LONGITUDE), is.finite(LATITUDE), is.finite(PRICE))
+
+# Create an interpolation grid using akima::interp
+interp_result &lt;- with(housing_data, 
+  akima::interp(x = LONGITUDE, y = LATITUDE, z = PRICE, duplicate = &quot;mean&quot;,
+                xo = seq(min(LONGITUDE), max(LONGITUDE), length = 100),
+                yo = seq(min(LATITUDE), max(LATITUDE), length = 100))
+)
+
+# Convert the interpolated results to a data frame
+interp_df &lt;- expand.grid(LONGITUDE = interp_result$x, LATITUDE = interp_result$y)
+interp_df$PRICE &lt;- as.vector(interp_result$z)
+
+# Calculate the bounding box from housing data with a small buffer
+lon_range &lt;- range(housing_data$LONGITUDE, na.rm = TRUE)
+lat_range &lt;- range(housing_data$LATITUDE, na.rm = TRUE)
+bbox &lt;- c(left = lon_range[1] - 0.01,
+          bottom = lat_range[1] - 0.01,
+          right = lon_range[2] + 0.01,
+          top = lat_range[2] + 0.01)
+
+# Fetch a satellite basemap from Google
+basemap &lt;- get_map(location = bbox, source = &quot;google&quot;, maptype = &quot;satellite&quot;, zoom = 12)</code></pre>
+<pre><code>## ! Bounding box given to Google - spatial extent only approximate.</code></pre>
+<pre><code>## ℹ &lt;https://maps.googleapis.com/maps/api/staticmap?center=41.973027,-87.909708&amp;zoom=12&amp;size=640x640&amp;scale=2&amp;maptype=satellite&amp;language=en-EN&amp;key=xxx&gt;</code></pre>
+<pre class="r"><code># Create a continuous heatmap overlay of housing prices on the satellite basemap
+p &lt;- ggmap(basemap) +
+  geom_tile(data = interp_df, aes(x = LONGITUDE, y = LATITUDE, fill = PRICE), 
+            alpha = 0.75) +
+  scale_fill_viridis_c(name = &quot;Average Price&quot;, option = &quot;viridis&quot;) +
+  labs(title = &quot;Housing Prices Heatmap&quot;, x = &quot;Longitude&quot;, y = &quot;Latitude&quot;) +
+  theme_minimal()
+
+print(p)</code></pre>
+<pre><code>## Warning: Removed 300 rows containing missing values or values outside the scale range
+## (`geom_tile()`).</code></pre>
+<p><img src="sourceCode_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

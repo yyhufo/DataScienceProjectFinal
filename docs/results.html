@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Results &amp; Discussion</title>
+
+<script src="site_libs/header-attrs-2.28/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Mapping Noise Polution at Chicago O'Hare Airport</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="results.html">Results &amp; Discussion</a>
+</li>
+<li>
+  <a href="sourceCode.html">Source Code</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Results &amp; Discussion</h1>
+
+</div>
+
+
+<div id="research-question" class="section level2">
+<h2>Research Question</h2>
+<p>Restating our research question:</p>
+<p><strong>Is the intensity and frequency of aircraft noise at Chicago
+O’Hare linked to fluctuations in flight operations, and does this, in
+turn, influence local housing prices?</strong></p>
+<div id="flight-operations-at-ohare" class="section level3">
+<h3>1. Flight Operations at O’Hare</h3>
+<p>Our first step was to examine overall flight operations at O’Hare.
+Figures <strong>Departure_by_hour.png</strong> and
+<strong>Arrivals_by_hour.png</strong> depict the hourly distribution of
+departures and arrivals, respectively. The data we used is over a 24
+hour period on October 27th, 2024. We observe pronounced peaks during
+the morning and late afternoon/evening hours, reflecting O’Hare’s role
+as a major international hub. These busy periods are often associated
+with elevated noise levels due to increased aircraft movements.</p>
+<p><img src="Departure_by_hour.png" width="49.5%" /><img src="Arrivals_by_hour.png" width="49.5%" /></p>
+</div>
+<div id="noise-pattern-by-hour" class="section level3">
+<h3>2. Noise Pattern by Hour</h3>
+<p>Next, we analyzed the noise events recorded by the 40 monitoring
+stations in the O’Hare vicinity. Figure below shows the number of noise
+events per hour of day, confirming that noise events typically coincide
+with O’Hare’s peak flight times. This temporal correlation shows the
+direct relationship between aircraft movements and elevated noise
+levels.</p>
+<p><img src="Noise_by_hour.png" width="700" style="display: block; margin: auto;" /></p>
+</div>
+<div id="monitoring-stations-interactive-map" class="section level3">
+<h3>3. Monitoring Stations Interactive Map</h3>
+<p>To contextualize these noise events spatially, we created an
+interactive Leaflet map (see <strong>map_2.html</strong>) of all
+monitoring station locations:</p>
+<ul>
+<li>Each station is shown as a circle marker, styled with a radius,
+color, and fill opacity.</li>
+<li>Popups display each station’s ID and address, and labels identify
+the station number.</li>
+<li>Color is mapped to the total number of noise events per station,
+enabling quick assessments of which stations experience the most
+frequent noise events.</li>
+</ul>
+<p>We find that the noise stations directly under the approach paths of
+the runways used most frequently tend to record the highest instances of
+noise events. These results again shows the relationship between flight
+corridors and noise impacts. By mapping event counts, we are able to
+further understand how flight operations translate to measurable noise
+exposure at each monitoring site.</p>
+<iframe src="map_2.html" width="80%" height="500"></iframe>
+</div>
+<div id="single-flight-example" class="section level3">
+<h3>4. Single Flight Example</h3>
+<p>Figure <strong>AA760_departure_satellite.gif</strong> animates the
+departure path of American Airlines Flight 760 from O’Hare on October
+17th at around 5 AM. We will use this flight to highlight how the noise
+stations operate.</p>
+<p><img src="AA760_departure_satellite.gif" width="80%" style="display: block; margin: auto;" /></p>
+<p>Upon ploting the departure path of AA760, we further integrated the
+flight track and monitoring stations into a single animation (see
+<strong>Combined_Noise_Flight.gif</strong>). In this GIF, we gradually
+reveal the AA760 departure path while highlighting each station in red
+whenever a noise event is detected. This combined visualization helps
+clarify how noise events align (in time and space) with aircraft
+operations. Note that the noise event data is corse, and is only
+recorded to every minute. This may explain why we observe delayed
+activation of some of the noise stations under the flight path.</p>
+<p><img src="Combined_Noise_Flight.gif" style="display: block; margin: auto;" /></p>
+</div>
+<div id="noise-contour" class="section level3">
+<h3>5. Noise Contour</h3>
+<p>To deepen our spatial analysis, we interpolated the Sound Exposure
+Level (SEL) values across the region and plotted them as contours. The
+animation in <strong>noise_contour.gif</strong> illustrates how these
+contours evolve over a day. These contour lines highlight areas where
+SEL values transition sharply, while the color scale (from low SEL in
+blue/purple to high SEL in yellow/green) shows differing noise
+intensity. Monitoring stations are shown as red dots, helping us figure
+out which neighborhoods coincide with high-noise zones.</p>
+<p><img src="noise_contour.gif" style="display: block; margin: auto;" /></p>
+</div>
+<div id="comparing-noise-and-housing-prices" class="section level3">
+<h3>6. Comparing Noise and Housing Prices</h3>
+<p>As a bonus, we wanted to investigate the relationship between noise
+levels and local housing prices. Figure
+<strong>noise_contour_hour17.png</strong> shows a noise contour map for
+5:00 PM (17:00), where contour lines highlight areas with significant
+noise-level gradients. Red points mark the monitoring stations,
+illustrating regions of particular concern. We can see that noise levels
+are lowest to the North and South of the airport, which suggests that
+these areas experience less noise exposure. Looking at the runway layout
+and published departure procedures for O’Hare, it becomes clear that
+these quieter zones benefit from the flight paths bypassing or minimally
+impacting them, as most of its runways are East-West facing.</p>
+<p>Meanwhile, Figure <strong>Housing_Prices.png</strong> presents a heat
+map of housing values around O’Hare. Comparing these two visuals reveals
+that areas with lower noise levels closely align with higher housing
+prices (notably to the North and South of the airport). This suggests
+that persistent aircraft noise could negatively affect property
+values.</p>
+<p><img src="noise_contour_hour17.png" width="49.5%" /><img src="Housing_Prices.png" width="49.5%" /></p>
+<hr />
+<p>In conclusion, our analysis reveals a strong connection between
+flight activity and noise pollution in the O’Hare area. The interactive
+monitoring stations map, the hourly histograms of departures and
+arrivals, the flight track animations, and the evolving spatial noise
+contours all indicate that busy flight periods coincide with elevated
+noise levels along the aircraft corridors. Additionally, the housing
+price heat map shows that neighborhoods with lower noise levels tend to
+have higher property values, suggesting that persistent aircraft noise
+could adversely affect local real estate and socialeconomic levels.
+These findings highlight the complex relationship between aviation
+operations and community well-being, pointing to the potential need for
+improved noise abatement policies.</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
